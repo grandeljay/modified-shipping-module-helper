@@ -1,0 +1,32 @@
+{
+    "name": "Shipping Module Helper",
+    "archiveName": "grandeljay/shipping-module-helper",
+    "sourceDir": "src",
+    "version": "auto",
+    "shortDescription": "Allows you to use useful helper methods for your shipping module.",
+    "description": "",
+    "developer": "grandeljay",
+    "developerWebsite": "https://github.com/grandeljay",
+    "website": "https://github.com/grandeljay/modified-shipping-module-helper",
+    "category": "library",
+    "price": "free",
+    "tags": "library",
+    "require": {
+        "composer/autoload": "^1.5.0",
+        "robinthehood/modified-std-module": "^0.12.0"
+    },
+    "modifiedCompatibility": [
+        "2.0.7.2"
+    ],
+    "php": {
+        "version": "^8.1"
+    },
+    "mmlc": {
+        "version": "^1.22.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Grandeljay\\ShippingModuleHelper\\": "src-mmlc"
+        }
+    }
+}

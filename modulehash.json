@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "scopes": {
+        "shop-root": {
+            "hashes": []
+        },
+        "shop-vendor-mmlc": {
+            "hashes": {
+                "/OrderBox.php": "2a8911de0e8699d06db12a52e1e77d40",
+                "/OrderPacker.php": "d5bd2a2633ca5cf97a39bcc7cf96505c",
+                "/OrderProduct.php": "db19112a57bc069858c7b52ed3d24268",
+                "/ShippingModuleHelper.php": "dcd6b9081f4042b559b7a5b5df08516c",
+                "/ShippingModuleHelperInterface.php": "52d8460b6e417e05f00275e098cc95ad",
+                "/TestModule.php": "1eb29b0f8906fc5705604fa3066e7f4f"
+            }
+        }
+    }
+}
