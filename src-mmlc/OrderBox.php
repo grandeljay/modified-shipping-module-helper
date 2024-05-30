@@ -20,6 +20,16 @@ class OrderBox
         $this->products[] = $attribute;
     }
 
+    /**
+     * @deprecated 0.1.2 This method was renamed to `getWeightWithoutAttributes`.
+     *
+     * @return float
+     */
+    public function getWeightWithAttributes(): float
+    {
+        return $this->getWeightWithoutAttributes();
+    }
+
     public function getWeightWithoutAttributes(): float
     {
         $weight = 0;
