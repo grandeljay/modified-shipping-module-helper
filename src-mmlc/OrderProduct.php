@@ -98,38 +98,26 @@ class OrderProduct
 
     public function getWeightWithoutAttributes(): float
     {
-        $weight = $this->getWeightWithAttributes();
+        \preg_match('/\d+/', $this->data['id'], $product_id_matches);
 
-        /** Get actual weight for attribute */
-        $attributes      = $this->getAttributes();
-        $attributes_data = $this->getAttributesAsProductData();
+        $product_id = $product_id_matches[0] ?? null;
 
-        foreach ($attributes_data as $key => $value) {
-            $attributes[$key]['weight'] = $attributes_data[$key]['weight'];
+        if (null === $product_id) {
+            return 0;
         }
 
-        /** Subtract attributes weight */
-        foreach ($attributes as $attribute) {
-            $operator = $attribute['prefix'] ?? '+';
+        $product_weight_query = \xtc_db_query(
+            \sprintf(
+                'SELECT `products_weight`
+                   FROM `%s`
+                  WHERE `products_id` = %d',
+                \TABLE_PRODUCTS,
+                $product_id
+            )
+        );
+        $product_weight_data  = \xtc_db_fetch_array($product_weight_query);
+        $product_weight       = $product_weight_data['products_weight'] ?? 0;
 
-            switch ($operator) {
-                case '+':
-                    $weight -= $attribute['weight'] ?? 0;
-                    break;
-
-                case '-':
-                    $weight += $attribute['weight'] ?? 0;
-                    break;
-            }
-        }
-
-        /** Avoid negative weight numbers */
-        $weight = max($weight, 0);
-
-        /** Use volumetric weight, if it's more */
-        $weight_volumetric = $this->getVolumetricWeight();
-        $weight            = max($weight, $weight_volumetric);
-
-        return $weight;
+        return $product_weight;
     }
 }
