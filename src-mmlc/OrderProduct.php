@@ -100,9 +100,15 @@ class OrderProduct
     {
         $weight = $this->getWeightWithAttributes();
 
-        /** Subtract attributes weight */
-        $attributes = $this->getAttributes();
+        /** Get actual weight for attribute */
+        $attributes      = $this->getAttributes();
+        $attributes_data = $this->getAttributesAsProductData();
 
+        foreach ($attributes_data as $key => $value) {
+            $attributes[$key]['weight'] = $attributes_data[$key]['weight'];
+        }
+
+        /** Subtract attributes weight */
         foreach ($attributes as $attribute) {
             $operator = $attribute['prefix'] ?? '+';
 
