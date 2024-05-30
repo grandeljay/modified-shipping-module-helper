@@ -20,7 +20,7 @@ class OrderBox
         $this->products[] = $attribute;
     }
 
-    public function getWeightWithAttributes(): float
+    public function getWeightWithoutAttributes(): float
     {
         $weight = 0;
 

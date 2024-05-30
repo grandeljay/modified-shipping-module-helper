@@ -81,7 +81,7 @@ class OrderPacker
             $product_was_packed = false;
 
             foreach ($this->boxes as $box) {
-                $box_weight = $box->getWeightWithAttributes();
+                $box_weight = $box->getWeightWithoutAttributes();
 
                 $product_fits_in_box = $box_weight + $product_weight_to_pack <= $box_weight_ideal;
 
@@ -117,7 +117,7 @@ class OrderPacker
         $weight = 0;
 
         foreach ($this->boxes as $box) {
-            $weight += $box->getWeightWithAttributes();
+            $weight += $box->getWeightWithoutAttributes();
         }
 
         return $weight;
@@ -134,7 +134,7 @@ class OrderPacker
 
         if ($user_is_admin) {
             foreach ($this->boxes as $box) {
-                $box_weight = $box->getWeightWithAttributes();
+                $box_weight = $box->getWeightWithoutAttributes();
                 $box_key    = \sprintf(
                     '%01.2f Kg',
                     $box_weight
