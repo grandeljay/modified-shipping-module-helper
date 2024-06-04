@@ -5,6 +5,7 @@ namespace Grandeljay\ShippingModuleHelper;
 class OrderBox
 {
     private array $products = [];
+    private float $weight;
 
     public function __construct()
     {
@@ -32,6 +33,10 @@ class OrderBox
 
     public function getWeightWithoutAttributes(): float
     {
+        if (isset($this->weight)) {
+            return $this->weight;
+        }
+
         $weight = 0;
 
         foreach ($this->products as $order_product) {
@@ -42,6 +47,8 @@ class OrderBox
              */
             $weight += $order_product->getWeightWithoutAttributes();
         }
+
+        $this->weight = $weight;
 
         return $weight;
     }
