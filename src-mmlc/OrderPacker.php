@@ -55,9 +55,7 @@ class OrderPacker
             foreach ($order_product_attributes_data as $attribute_as_product_data) {
                 $attribute_order_product = new OrderProduct($attribute_as_product_data);
 
-                for ($quantity = 1; $quantity <= $order_product->getQuantity(); $quantity++) {
-                    $this->packProduct($attribute_order_product);
-                }
+                $this->packProduct($attribute_order_product);
             }
         }
     }
