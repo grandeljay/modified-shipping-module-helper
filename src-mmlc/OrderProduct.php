@@ -4,6 +4,8 @@ namespace Grandeljay\ShippingModuleHelper;
 
 class OrderProduct
 {
+    private float $weight_without_attributes;
+
     public function __construct(private array $data)
     {
     }
@@ -16,6 +18,14 @@ class OrderProduct
     public function getAttributes(): array
     {
         return $this->data['attributes'] ?? [];
+    }
+
+    public function hasAttributes(): bool
+    {
+        $attributes     = $this->getAttributes();
+        $has_attributes = !empty($attributes);
+
+        return $has_attributes;
     }
 
     public function getAttributesAsProductData(): array
@@ -100,10 +110,24 @@ class OrderProduct
     {
         \preg_match('/\d+/', $this->data['id'], $product_id_matches);
 
-        $product_id = $product_id_matches[0] ?? null;
+        $product_id             = $product_id_matches[0] ?? null;
+        $product_has_attributes = $this->hasAttributes();
+
+        if (!$product_has_attributes) {
+            $product_weight = max(
+                $this->getWeightWithAttributes(),
+                $this->getVolumetricWeight()
+            );
+
+            return $product_weight;
+        }
 
         if (null === $product_id) {
             return 0;
+        }
+
+        if (isset($this->weight_without_attributes)) {
+            return $this->weight_without_attributes;
         }
 
         $product_weight_query = \xtc_db_query(
@@ -120,6 +144,8 @@ class OrderProduct
             $product_weight_data['products_weight'] ?? 0,
             $this->getVolumetricWeight()
         );
+
+        $this->weight_without_attributes = $product_weight;
 
         return $product_weight;
     }
