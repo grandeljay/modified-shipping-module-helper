@@ -116,7 +116,10 @@ class OrderProduct
             )
         );
         $product_weight_data  = \xtc_db_fetch_array($product_weight_query);
-        $product_weight       = $product_weight_data['products_weight'] ?? 0;
+        $product_weight       = max(
+            $product_weight_data['products_weight'] ?? 0,
+            $this->getVolumetricWeight()
+        );
 
         return $product_weight;
     }
