@@ -10,14 +10,14 @@ class OrderBox
     {
     }
 
-    public function addProductWithAttributes(OrderProduct $order_product): void
+    public function addProductWithAttributes(OrderProduct $order_product, int $quantity = 1): void
     {
         $product_was_added = false;
 
         foreach ($this->products as &$product_entry) {
             if ($product_entry['product'] === $order_product) {
-                $product_entry['quantity']++;
-                $product_was_added = true;
+                $product_entry['quantity'] += $quantity;
+                $product_was_added          = true;
 
                 break;
             }
@@ -25,7 +25,7 @@ class OrderBox
 
         if (!$product_was_added) {
             $this->products[] = [
-                'quantity' => 1,
+                'quantity' => $quantity,
                 'product'  => $order_product,
             ];
         }

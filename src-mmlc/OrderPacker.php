@@ -70,36 +70,52 @@ class OrderPacker
      */
     public function packProduct(OrderProduct $order_product): bool
     {
-        $product_weight_to_pack = $order_product->getWeightWithoutAttributes();
+        $product_was_packed         = false;
+        $product_weight             = $order_product->getWeightWithoutAttributes();
+        $product_quantity           = $order_product->getQuantity();
+        $product_quantity_remaining = $product_quantity;
 
         $box_weight_maximum = $this->weight_maximum;
         $box_weight_ideal   = $this->weight_ideal;
 
-        for ($quantity = 1; $quantity <= $order_product->getQuantity(); $quantity++) {
-            $product_was_packed = false;
+        foreach ($this->boxes as $box) {
+            $box_weight  = $box->getWeightWithoutAttributes();
+            $box_is_full = $box_weight >= $box_weight_ideal;
 
-            foreach ($this->boxes as $box) {
-                $box_weight = $box->getWeightWithoutAttributes();
+            $product_fits_in_box = $box_weight + $product_weight <= $box_weight_ideal;
 
-                $product_fits_in_box = $box_weight + $product_weight_to_pack <= $box_weight_ideal;
-
-                if ($product_fits_in_box) {
-                    $box->addProductWithAttributes($order_product);
-
-                    $product_was_packed = true;
-                } else {
-                    continue;
-                }
+            if ($box_is_full || !$product_fits_in_box) {
+                continue;
             }
 
-            if (true !== $product_was_packed) {
-                $box_to_add = new OrderBox();
-                $box_to_add->addProductWithAttributes($order_product);
+            $box_weight_remaining = $box_weight_ideal - $box_weight;
 
-                $this->boxes[] = $box_to_add;
+            $product_quantity_possible = \floor($box_weight_remaining / $product_weight);
 
+            $box->addProductWithAttributes($order_product, $product_quantity_possible);
+
+            $product_quantity_remaining -= $product_quantity_possible;
+
+            if ($product_quantity_remaining <= 0) {
                 $product_was_packed = true;
+
+                break;
             }
+        }
+
+        if (!$product_was_packed) {
+            if ($product_weight > $box_weight_ideal) {
+                $product_quantity_possible = max(1, \floor($box_weight_maximum / $product_weight));
+            } else {
+                $product_quantity_possible = $box_weight_ideal / $product_weight;
+            }
+
+            $box_to_add = new OrderBox();
+            $box_to_add->addProductWithAttributes($order_product, $product_quantity_possible);
+
+            $this->boxes[] = $box_to_add;
+
+            $product_was_packed = true;
         }
 
         return $product_was_packed;
