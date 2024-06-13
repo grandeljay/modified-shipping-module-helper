@@ -98,7 +98,7 @@ class OrderPacker
 
         foreach ($boxes_to_consider as $box) {
             $box_weight_remaining      = $box_weight_ideal - $box_weight;
-            $product_quantity_possible = \floor($box_weight_remaining / $product_weight);
+            $product_quantity_possible = \min($product_quantity, \floor($box_weight_remaining / $product_weight));
 
             $box->addProductWithAttributes($order_product, $product_quantity_possible);
 
@@ -113,9 +113,9 @@ class OrderPacker
 
         if (!$product_was_packed) {
             if ($product_weight > $box_weight_ideal) {
-                $product_quantity_possible = max(1, \floor($box_weight_maximum / $product_weight));
+                $product_quantity_possible = 1;
             } else {
-                $product_quantity_possible = \floor($box_weight_ideal / $product_weight);
+                $product_quantity_possible = \min($product_quantity, \floor($box_weight_ideal / $product_weight));
             }
 
             do {
