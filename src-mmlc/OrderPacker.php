@@ -142,10 +142,12 @@ class OrderPacker
 
     public function getWeight(): float
     {
-        $weight = 0;
+        $weight           = 0;
+        $weight_empty_box = defined('SHIPPING_BOX_WEIGHT') ? (float) \SHIPPING_BOX_WEIGHT : 0;
 
         foreach ($this->boxes as $box) {
             $weight += $box->getWeightWithoutAttributes();
+            $weight += $weight_empty_box;
         }
 
         return $weight;
