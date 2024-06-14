@@ -97,7 +97,13 @@ class OrderPacker
         }
 
         foreach ($boxes_to_consider as $box) {
-            $box_weight_remaining      = $box_weight_ideal - $box_weight;
+            $box_weight_remaining = $box_weight_ideal - $box_weight;
+            $product_fits_in_box  = $box_weight + $product_weight <= $box_weight_ideal;
+
+            if ($box_weight_remaining <= 0 || !$product_fits_in_box) {
+                continue;
+            }
+
             $product_quantity_possible = \min($product_quantity, \floor($box_weight_remaining / $product_weight));
 
             $box->addProductWithAttributes($order_product, $product_quantity_possible);
