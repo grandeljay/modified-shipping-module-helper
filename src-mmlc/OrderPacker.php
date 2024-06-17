@@ -104,7 +104,11 @@ class OrderPacker
                 continue;
             }
 
-            $product_quantity_possible = \min($product_quantity, \floor($box_weight_remaining / $product_weight));
+            if ($product_weight <= 0) {
+                $product_quantity_possible = $product_quantity;
+            } else {
+                $product_quantity_possible = \min($product_quantity, \floor($box_weight_remaining / $product_weight));
+            }
 
             $box->addProductWithAttributes($order_product, $product_quantity_possible);
 
@@ -121,7 +125,11 @@ class OrderPacker
             if ($product_weight > $box_weight_ideal) {
                 $product_quantity_possible = 1;
             } else {
-                $product_quantity_possible = \min($product_quantity, \floor($box_weight_ideal / $product_weight));
+                if ($product_weight <= 0) {
+                    $product_quantity_possible = $product_quantity;
+                } else {
+                    $product_quantity_possible = \min($product_quantity, \floor($box_weight_ideal / $product_weight));
+                }
             }
 
             do {
