@@ -10,6 +10,23 @@ class OrderProduct
     {
     }
 
+    public function __debugInfo(): array
+    {
+        $debug_info = [
+            'id'                    => $this->getIdWithoutAttributes(),
+            'id_with_attributes'    => $this->data['id'],
+            'model'                 => $this->data['model'],
+            'weight'                => $this->getWeightWithoutAttributes(),
+            'weight_with_attibutes' => \max(
+                $this->getWeightWithAttributes(),
+                $this->getVolumetricWeight()
+            ),
+            'quantity'              => $this->getQuantity(),
+        ];
+
+        return $debug_info;
+    }
+
     public function getQuantity(): int
     {
         return $this->data['qty'] ?? 1;
