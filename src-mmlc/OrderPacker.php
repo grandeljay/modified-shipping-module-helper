@@ -81,20 +81,7 @@ class OrderPacker
         $product_quantity           = $order_product->getQuantity();
         $product_quantity_remaining = $product_quantity;
 
-        foreach ($this->boxes as $box) {
-            $box_weight  = $box->getWeightWithoutAttributes();
-            $box_is_full = $box_weight >= $box_weight_ideal;
-
-            $product_fits_in_box = $box_weight + $product_weight <= $box_weight_ideal;
-
-            if ($box_is_full || !$product_fits_in_box) {
-                $boxes_to_ignore[] = $box;
-
-                continue;
-            }
-
-            $boxes_to_consider[] = $box;
-        }
+        $boxes_to_consider = $this->getBoxesToConsider($order_product);
 
         foreach ($boxes_to_consider as $box) {
             $box_weight_remaining = $box_weight_ideal - $box_weight;
@@ -162,6 +149,32 @@ class OrderPacker
     public function getBoxes(): array
     {
         return $this->boxes;
+    }
+
+    private function getBoxesToConsider(OrderProduct $order_product): array
+    {
+        $boxes_to_consider = [];
+
+        $box_weight_ideal = $this->weight_ideal;
+
+        $product_weight = $order_product->getWeightWithoutAttributes();
+
+        foreach ($this->boxes as $box) {
+            $box_weight  = $box->getWeightWithoutAttributes();
+            $box_is_full = $box_weight >= $box_weight_ideal;
+
+            $product_fits_in_box = $box_weight + $product_weight <= $box_weight_ideal;
+
+            if ($box_is_full || !$product_fits_in_box) {
+                $boxes_to_ignore[] = $box;
+
+                continue;
+            }
+
+            $boxes_to_consider[] = $box;
+        }
+
+        return $boxes_to_consider;
     }
 
     public function getWeight(): float
