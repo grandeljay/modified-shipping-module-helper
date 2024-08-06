@@ -106,11 +106,18 @@ class OrderProduct
         return $weight;
     }
 
-    public function getWeightWithoutAttributes(): float
+    public function getIdWithoutAttributes(): int
     {
         \preg_match('/\d+/', $this->data['id'], $product_id_matches);
 
-        $product_id             = $product_id_matches[0] ?? null;
+        $product_id = $product_id_matches[0] ?? 0;
+
+        return $product_id;
+    }
+
+    public function getWeightWithoutAttributes(): float
+    {
+        $product_id             = $this->getIdWithoutAttributes();
         $product_has_attributes = $this->hasAttributes();
 
         if (!$product_has_attributes) {
