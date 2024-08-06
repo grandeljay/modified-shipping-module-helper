@@ -133,12 +133,17 @@ class OrderPacker
             }
 
             do {
+                $product_quantity_to_add = \min(
+                    $product_quantity_remaining,
+                    $product_quantity_possible
+                );
+
                 $box_to_add = new OrderBox();
-                $box_to_add->addProductWithAttributes($order_product, $product_quantity_possible);
+                $box_to_add->addProductWithAttributes($order_product, $product_quantity_to_add);
 
-                $boxes_to_ignore[] = $box_to_add;
+                $boxes_to_consider[] = $box_to_add;
 
-                $product_quantity_remaining -= $product_quantity_possible;
+                $product_quantity_remaining -= $product_quantity_to_add;
             } while ($product_quantity_remaining > 0);
 
             $product_was_packed = true;
