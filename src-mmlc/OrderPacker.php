@@ -70,85 +70,89 @@ class OrderPacker
      */
     public function packProduct(OrderProduct $order_product): bool
     {
-        $boxes_to_consider = [];
-        $boxes_to_ignore   = [];
+        $boxes_to_consider = $this->getBoxesToConsider($order_product);
 
         $box_weight_maximum = $this->weight_maximum;
         $box_weight_ideal   = $this->weight_ideal;
 
-        $product_was_packed         = false;
         $product_weight             = $order_product->getWeightWithoutAttributes();
         $product_quantity           = $order_product->getQuantity();
         $product_quantity_remaining = $product_quantity;
 
-        $boxes_to_consider = $this->getBoxesToConsider($order_product);
+        /** Pack into existing boxes */
+        foreach ($boxes_to_consider as $order_box) {
+            $product_quantity_to_add = $this->getQuantityToAdd($order_box, $order_product, $product_quantity_remaining);
 
-        foreach ($boxes_to_consider as $box) {
-            $box_weight_remaining = $box_weight_ideal - $box_weight;
-            $product_fits_in_box  = $box_weight + $product_weight <= $box_weight_ideal;
+            $order_box->addProductWithAttributes($order_product, $product_quantity_to_add);
 
-            if ($box_weight_remaining <= 0 || !$product_fits_in_box) {
-                continue;
+            $product_quantity_remaining -= $product_quantity_to_add;
+
+            if ($product_quantity_remaining <= 0) {
+                /** The product was packed, there is nothing more to do. */
+                return true;
             }
+        }
 
-            if ($product_weight <= 0) {
-                $product_quantity_possible = $product_quantity;
-            } else {
-                $product_quantity_possible = \min($product_quantity, \floor($box_weight_remaining / $product_weight));
-            }
+        /** Pack into new boxes */
+        if ($product_weight <= 0) {
+            $product_quantity_possible = $product_quantity_remaining;
+        } elseif ($product_weight > $box_weight_ideal) {
+            $product_quantity_possible = 1;
+        } else {
+            $product_quantity_possible = \min(
+                $product_quantity_remaining,
+                \floor($box_weight_ideal / $product_weight)
+            );
+        }
 
+        do {
             $product_quantity_to_add = \min(
                 $product_quantity_remaining,
                 $product_quantity_possible
             );
 
-            $box->addProductWithAttributes($order_product, $product_quantity_to_add);
+            $box_to_add = new OrderBox();
+            $box_to_add->addProductWithAttributes($order_product, $product_quantity_to_add);
+
+            $this->boxes[] = $box_to_add;
 
             $product_quantity_remaining -= $product_quantity_to_add;
+        } while ($product_quantity_remaining > 0);
 
-            if ($product_quantity_remaining <= 0) {
-                $product_was_packed = true;
-
-                break;
-            }
-        }
-
-        if (!$product_was_packed) {
-            if ($product_weight > $box_weight_ideal) {
-                $product_quantity_possible = 1;
-            } else {
-                if ($product_weight <= 0) {
-                    $product_quantity_possible = $product_quantity;
-                } else {
-                    $product_quantity_possible = \min($product_quantity, \floor($box_weight_ideal / $product_weight));
-                }
-            }
-
-            do {
-                $product_quantity_to_add = \min(
-                    $product_quantity_remaining,
-                    $product_quantity_possible
-                );
-
-                $box_to_add = new OrderBox();
-                $box_to_add->addProductWithAttributes($order_product, $product_quantity_to_add);
-
-                $boxes_to_consider[] = $box_to_add;
-
-                $product_quantity_remaining -= $product_quantity_to_add;
-            } while ($product_quantity_remaining > 0);
-
-            $product_was_packed = true;
-        }
-
-        $this->boxes = \array_merge($boxes_to_consider, $boxes_to_ignore);
-
-        return $product_was_packed;
+        return true;
     }
 
     public function getBoxes(): array
     {
         return $this->boxes;
+    }
+
+    private function getQuantityToAdd(OrderBox $order_box, OrderProduct $order_product, int $product_quantity_remaining): int
+    {
+        $box_weight           = $order_box->getWeightWithoutAttributes();
+        $box_weight_ideal     = $this->weight_ideal;
+        $box_weight_remaining = $box_weight_ideal - $box_weight;
+
+        $product_weight   = $order_product->getWeightWithoutAttributes();
+        $product_quantity = $order_product->getQuantity();
+
+        if ($product_weight <= 0) {
+            $product_quantity_possible = $product_quantity;
+        } elseif ($product_weight > $box_weight_ideal) {
+            $product_quantity_possible = 1;
+        } else {
+            $product_quantity_possible = \min(
+                $product_quantity,
+                \floor($box_weight_remaining / $product_weight)
+            );
+        }
+
+        $product_quantity_to_add = \min(
+            $product_quantity_remaining,
+            $product_quantity_possible
+        );
+
+        return $product_quantity_to_add;
     }
 
     private function getBoxesToConsider(OrderProduct $order_product): array
@@ -165,8 +169,6 @@ class OrderPacker
             $box_is_full          = $box_weight >= $box_weight_ideal;
 
             $product_fits_in_box = $box_weight + $product_weight <= $box_weight_ideal;
-
-                $boxes_to_ignore[] = $box;
 
             if ($box_weight_remaining <= 0 || $box_is_full || !$product_fits_in_box) {
                 continue;
