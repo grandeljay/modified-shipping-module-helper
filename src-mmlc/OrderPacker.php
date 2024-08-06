@@ -160,14 +160,15 @@ class OrderPacker
         $product_weight = $order_product->getWeightWithoutAttributes();
 
         foreach ($this->boxes as $box) {
-            $box_weight  = $box->getWeightWithoutAttributes();
-            $box_is_full = $box_weight >= $box_weight_ideal;
+            $box_weight           = $box->getWeightWithoutAttributes();
+            $box_weight_remaining = $box_weight_ideal - $box_weight;
+            $box_is_full          = $box_weight >= $box_weight_ideal;
 
             $product_fits_in_box = $box_weight + $product_weight <= $box_weight_ideal;
 
-            if ($box_is_full || !$product_fits_in_box) {
                 $boxes_to_ignore[] = $box;
 
+            if ($box_weight_remaining <= 0 || $box_is_full || !$product_fits_in_box) {
                 continue;
             }
 
