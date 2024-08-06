@@ -110,9 +110,14 @@ class OrderPacker
                 $product_quantity_possible = \min($product_quantity, \floor($box_weight_remaining / $product_weight));
             }
 
-            $box->addProductWithAttributes($order_product, $product_quantity_possible);
+            $product_quantity_to_add = \min(
+                $product_quantity_remaining,
+                $product_quantity_possible
+            );
 
-            $product_quantity_remaining -= $product_quantity_possible;
+            $box->addProductWithAttributes($order_product, $product_quantity_to_add);
+
+            $product_quantity_remaining -= $product_quantity_to_add;
 
             if ($product_quantity_remaining <= 0) {
                 $product_was_packed = true;
